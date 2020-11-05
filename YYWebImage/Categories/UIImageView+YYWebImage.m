@@ -287,21 +287,22 @@ static int _YYWebImageHighlightedSetterKey;
         
         // get the image from memory as quickly as possible
         UIImage *imageFromMemory = nil;
-        if (manager.cache &&
-            !(options & YYWebImageOptionUseNSURLCache) &&
-            !(options & YYWebImageOptionRefreshImageCache)) {
+        if (manager.cache) {
             imageFromMemory = [manager.cache getImageForKey:[manager cacheKeyForURL:imageURL] withType:YYImageCacheTypeMemory];
         }
+        
         if (imageFromMemory) {
             if (!(options & YYWebImageOptionAvoidSetImage)) {
-                self.highlightedImage = imageFromMemory;
+                self.image = imageFromMemory;
             }
-            if(completion) completion(imageFromMemory, imageURL, YYWebImageFromMemoryCacheFast, YYWebImageStageFinished, nil);
-            return;
-        }
-        
-        if (!(options & YYWebImageOptionIgnorePlaceHolder)) {
-            self.highlightedImage = placeholder;
+            if (!(options & YYWebImageOptionRefreshImageCache) && !(options & YYWebImageOptionUseNSURLCache)) {
+                if(completion) completion(imageFromMemory, imageURL, YYWebImageFromMemoryCacheFast, YYWebImageStageFinished, nil);
+                return;
+            }
+        } else {
+            if (!(options & YYWebImageOptionIgnorePlaceHolder)) {
+                self.image = placeholder;
+            }
         }
         
         __weak typeof(self) _self = self;
